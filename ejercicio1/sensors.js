@@ -49,7 +49,29 @@ class SensorManager {
         }
     }
 
-    async loadSensors(url) {}
+    async loadSensors(url) {
+        try{
+            const response = await fetch(url);
+            if(!response.ok){
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const sensorData=await response.json();
+            sensorData.forEach(sensor => {
+                const newSensor = new Sensor(
+                    sensor.id,
+                    sensor.name,
+                    sensor.type,
+                    sensor.value,
+                    sensor.unit,
+                    sensor.update_at
+                );
+                this.addSensor(newSensor);
+            });
+            this.render();
+        }catch(error){
+            console.error(`Failed to load sensors: ${error}`);
+        }
+    }
 
     render() {
         const container = document.getElementById("sensor-container");
@@ -76,7 +98,7 @@ class SensorManager {
                         </div>
                         <time datetime="${sensor.updated_at}">
                             Última actualización: ${new Date(
-                                sensor.updated_at
+                                sensor.update_at
                             ).toLocaleString()}
                         </time>
                     </div>
